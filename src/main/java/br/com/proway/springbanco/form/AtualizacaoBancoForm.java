@@ -22,6 +22,7 @@ public class AtualizacaoBancoForm {
 
 		if (banco.isPresent()) {
 			banco.get().setNome(getNome());
+			bancoRepository.save(banco.get());
 		}
 
 		return banco.get();
