@@ -153,7 +153,6 @@ public class Endereco {
 	}
 
 	private static String[] buscarCep(Integer cepInt) throws IOException {
-		String json;
 
 		var url = new URL("http://viacep.com.br/ws/" + cepInt + "/json");
 		var urlConnection = url.openConnection();
@@ -163,7 +162,7 @@ public class Endereco {
 		var jsonSb = new StringBuilder();
 
 		br.lines().forEach(l -> jsonSb.append(l.trim()));
-		json = jsonSb.toString();
+		String json = jsonSb.toString();
 
 		json = json.replaceAll("[{},:]", "");
 		json = json.replaceAll("\"", "\n");
@@ -175,8 +174,7 @@ public class Endereco {
 		var bairro = array[15];
 		var cidade = array[19];
 		var uf = array[23];
-		String endereco[] = { cep, logradouro, bairro, cidade, uf };
-		return endereco;
+		return new String[] { cep, logradouro, bairro, cidade, uf };
 
 	}
 

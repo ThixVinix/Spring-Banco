@@ -4,15 +4,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.proway.springbanco.banco.BancoEstatico;
 import br.com.proway.springbanco.dto.BancoDTO;
 import br.com.proway.springbanco.dto.ClienteDTO;
+import br.com.proway.springbanco.form.AtualizacaoBancoForm;
 import br.com.proway.springbanco.model.Banco;
 import br.com.proway.springbanco.model.Cliente;
 import br.com.proway.springbanco.repository.BancoRepository;
@@ -69,19 +74,18 @@ public class BancoController {
 //
 //	}
 
-//	@PutMapping("/{id}")
-//	public Usuario atualizar(@PathVariable String id, @RequestBody AtualizacaoUserForm userForm) {
-//		
-//		 List<Usuario> users = buscarUsuariosBanco();
-//		 Optional<Usuario> userFound = users.stream().filter(user -> user.getId().equals(Long.parseLong(id))).findFirst();
-//		 
-//			if (userFound.isPresent()) {
-//				return userForm.atualizar(id, userFound.get());
-//			} else {
-//				return null;
-//			}
-//
-//	}
+	@PutMapping("/{id}")
+	public String atualizar(@PathVariable String id, @RequestBody @Valid AtualizacaoBancoForm bancoForm) {
+		
+		 boolean wasModified = bancoForm.atualizarNomeBanco(id, bancoRepository);
+		
+			if (wasModified) {
+				return "Nome do Banco alterado com sucesso!";
+			} else {
+				return "Não foi possível modificar o nome do banco";
+			}
+
+	}
 
 //	@DeleteMapping("/{id}")
 //	public String deletar(@PathVariable String id) {
