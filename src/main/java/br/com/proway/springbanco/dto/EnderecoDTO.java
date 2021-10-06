@@ -46,6 +46,13 @@ public class EnderecoDTO {
 		return uf;
 	}
 
+	/**
+	 * <p>
+	 * Converte uma lista de objetos "Endereco" para uma lista "EnderecoDTO"
+	 * </p>
+	 * 
+	 * @return {@link Optional}<{@link List}<{@link EnderecoDTO}>>
+	 */
 	public static Optional<List<EnderecoDTO>> converter(List<Endereco> enderecos) {
 		if (enderecos == null || enderecos.isEmpty()) {
 			return Optional.empty();
@@ -53,6 +60,21 @@ public class EnderecoDTO {
 			return Optional.of(enderecos.stream().map(EnderecoDTO::new).collect(Collectors.toList())); // .map(endereco
 																										// -> new
 																										// EnderecoDTO(endereco))
+		}
+	}
+
+	/**
+	 * <p>
+	 * Converte o objeto "Endereco" para "EnderecoDTO"
+	 * </p>
+	 * 
+	 * @return {@link Optional}<{@link EnderecoDTO}>
+	 */
+	public static Optional<EnderecoDTO> converter(Endereco endereco) {
+		if (endereco == null) {
+			return Optional.empty();
+		} else {
+			return Optional.of(new EnderecoDTO(endereco));
 		}
 	}
 

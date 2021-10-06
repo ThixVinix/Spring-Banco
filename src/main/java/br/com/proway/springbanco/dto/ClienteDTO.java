@@ -65,6 +65,13 @@ public class ClienteDTO {
 		return enderecoDto;
 	}
 
+	/**
+	 * <p>
+	 * Converte uma lista de objetos "Cliente" para uma lista "ClienteDTO"
+	 * </p>
+	 * 
+	 * @return {@link Optional}<{@link List}<{@link ClienteDTO}>>
+	 */
 	public static Optional<List<ClienteDTO>> converter(List<Cliente> clientes) {
 		if (clientes == null || clientes.isEmpty()) {
 			return Optional.empty();
@@ -72,6 +79,21 @@ public class ClienteDTO {
 			return Optional.of(clientes.stream().map(ClienteDTO::new).collect(Collectors.toList())); // .map(cliente ->
 																										// new
 																										// ClienteDTO(cliente))
+		}
+	}
+
+	/**
+	 * <p>
+	 * Converte o objeto "Cliente" para "ClienteDTO"
+	 * </p>
+	 * 
+	 * @return {@link Optional}<{@link ClienteDTO}>
+	 */
+	public static Optional<ClienteDTO> converter(Cliente cliente) {
+		if (cliente == null) {
+			return Optional.empty();
+		} else {
+			return Optional.of(new ClienteDTO(cliente));
 		}
 	}
 

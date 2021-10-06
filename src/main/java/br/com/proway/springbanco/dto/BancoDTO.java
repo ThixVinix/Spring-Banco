@@ -36,12 +36,34 @@ public class BancoDTO {
 		return agencia;
 	}
 
+	/**
+	 * <p>
+	 * Converte uma lista de objetos "Banco" para uma lista "BancoDTO"
+	 * </p>
+	 * 
+	 * @return {@link Optional}<{@link List}<{@link BancoDTO}>>
+	 */
 	public static Optional<List<BancoDTO>> converter(List<Banco> bancos) {
 		if (bancos == null || bancos.isEmpty()) {
 			return Optional.empty();
 		} else {
 			return Optional.of(bancos.stream().map(BancoDTO::new).collect(Collectors.toList()));// .map(banco ->
 																								// newBancoDTO(banco))
+		}
+	}
+
+	/**
+	 * <p>
+	 * Converte o objeto "Banco" para "BancoDTO"
+	 * </p>
+	 * 
+	 * @return {@link Optional}<{@link BancoDTO}>
+	 */
+	public static Optional<BancoDTO> converter(Banco banco) {
+		if (banco == null) {
+			return Optional.empty();
+		} else {
+			return Optional.of(new BancoDTO(banco));
 		}
 	}
 

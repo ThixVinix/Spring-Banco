@@ -23,15 +23,6 @@ public class ContaDTO {
 	 */
 	private Double limite;
 
-	/**
-	 * <p>
-	 * Construtor para contas especiais, nas quais o limite eh personalizado.
-	 * </p>
-	 * 
-	 * @param numero Numero da conta.
-	 * @param senha  Senha da conta.
-	 * @param limite Limite da conta.
-	 */
 	public ContaDTO(Conta conta) {
 		this.numero = conta.getNumero();
 		this.saldo = conta.getSaldo();
@@ -50,12 +41,34 @@ public class ContaDTO {
 		return limite;
 	}
 
+	/**
+	 * <p>
+	 * Converte uma lista de objetos "Conta" para uma lista "ContaDTO"
+	 * </p>
+	 * 
+	 * @return {@link Optional}<{@link List}<{@link ContaDTO}>>
+	 */
 	public static Optional<List<ContaDTO>> converter(List<Conta> contas) {
 		if (contas == null || contas.isEmpty()) {
 			return Optional.empty();
 		} else {
 			return Optional.of(contas.stream().map(ContaDTO::new).collect(Collectors.toList())); // .map(conta -> new
 																									// ContaDTO(conta))
+		}
+	}
+
+	/**
+	 * <p>
+	 * Converte o objeto "Conta" para "ContaDTO"
+	 * </p>
+	 * 
+	 * @return {@link Optional}<{@link ContaDTO}>
+	 */
+	public static Optional<ContaDTO> converter(Conta conta) {
+		if (conta == null) {
+			return Optional.empty();
+		} else {
+			return Optional.of(new ContaDTO(conta));
 		}
 	}
 
