@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import br.com.proway.springbanco.model.Cliente;
-import br.com.proway.springbanco.model.Conta;
 
 public class ClienteDTO {
 
@@ -29,7 +28,7 @@ public class ClienteDTO {
 	/**
 	 * Endereco do cliente
 	 */
-	private String endereco;
+	private EnderecoDTO enderecoDto;
 
 	private ContaDTO contaDto;
 
@@ -38,12 +37,8 @@ public class ClienteDTO {
 		this.nome = cliente.getNome();
 		this.cpf = cliente.getCpf();
 		this.rg = cliente.getRg();
-		this.endereco = cliente.getEndereco();
+		this.enderecoDto = new EnderecoDTO(cliente.getEndereco());
 		this.contaDto = new ContaDTO(cliente.getConta());
-	}
-
-	public ContaDTO getContaDto() {
-		return contaDto;
 	}
 
 	public Long getId() {
@@ -62,16 +57,21 @@ public class ClienteDTO {
 		return rg;
 	}
 
-	public String getEndereco() {
-		return endereco;
+	public ContaDTO getContaDto() {
+		return contaDto;
 	}
-	
+
+	public EnderecoDTO getEnderecoDto() {
+		return enderecoDto;
+	}
+
 	public static Optional<List<ClienteDTO>> converter(List<Cliente> clientes) {
 		if (clientes == null || clientes.isEmpty()) {
 			return Optional.empty();
 		} else {
-			return Optional.of(clientes.stream().map(ClienteDTO::new).collect(Collectors.toList())); // .map(cliente -> new
-																									// ClienteDTO(cliente))
+			return Optional.of(clientes.stream().map(ClienteDTO::new).collect(Collectors.toList())); // .map(cliente ->
+																										// new
+																										// ClienteDTO(cliente))
 		}
 	}
 

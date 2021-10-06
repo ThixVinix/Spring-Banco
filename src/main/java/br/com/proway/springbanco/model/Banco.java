@@ -180,16 +180,17 @@ public class Banco {
 
 	private void validarInformacoesCliente(Cliente cliente) throws InsercaoClienteException {
 		if (cliente.getNome() == null || cliente.getNome().trim().equals(""))
-			throw new InsercaoClienteException();
+			throw new InsercaoClienteException("\"Nome\" nao existente ou invalido.");
 
 		if (cliente.getCpf() == null || cliente.getCpf().trim().equals(""))
-			throw new InsercaoClienteException();
+			throw new InsercaoClienteException("\"CPF\" nao existente ou invalido.");
 
 		if (cliente.getRg() == null || cliente.getRg().trim().equals(""))
-			throw new InsercaoClienteException();
+			throw new InsercaoClienteException("\"RG\" nao existente ou invalido.");
 
-		if (cliente.getEndereco() == null || cliente.getEndereco().trim().equals(""))
-			throw new InsercaoClienteException();
+		if (cliente.getEndereco() == null || cliente.getEndereco().getCep() == null
+				|| cliente.getEndereco().getCep().trim().equals(""))
+			throw new InsercaoClienteException("\"CEP\" nao existente ou invalido.");
 	}
 
 	/**

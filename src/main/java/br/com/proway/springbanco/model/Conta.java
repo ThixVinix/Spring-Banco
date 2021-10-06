@@ -94,10 +94,6 @@ public class Conta {
 		return id;
 	}
 
-	private void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getNumero() {
 		return numero;
 	}
