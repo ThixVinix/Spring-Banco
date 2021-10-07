@@ -56,21 +56,20 @@ public class Banco {
 	 * @param cnpj    - CNPJ do Banco (String);
 	 * @param agencia - Número da agência do banco (Integer).
 	 */
-	public Banco(Long id, String nome, String cnpj, Integer agencia) {
+	public Banco(String nome, String cnpj, Integer agencia) {
 		super();
-		setId(id);
 		setNome(nome);
 		setCnpj(cnpj);
 		setAgencia(agencia);
 		setClientes(new ArrayList<>());
 	}
+	
+	@SuppressWarnings("unused")
+	private Banco() {
+	}
 
 	public Long getId() {
 		return id;
-	}
-
-	private void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getNome() {

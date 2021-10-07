@@ -6,102 +6,123 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.proway.springbanco.banco.BancoEstatico;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import br.com.proway.springbanco.dto.BancoDTO;
-import br.com.proway.springbanco.dto.ClienteDTO;
 import br.com.proway.springbanco.form.AtualizacaoBancoForm;
+import br.com.proway.springbanco.form.BancoForm;
 import br.com.proway.springbanco.model.Banco;
-import br.com.proway.springbanco.model.Cliente;
 import br.com.proway.springbanco.repository.BancoRepository;
 
 @RestController
 @RequestMapping("/banco")
 public class BancoController {
 
+	private static final String MSG_CREATE_BANCO_SUCCESS = "Banco salvo com sucesso!";
+	private static final String MSG_EDIT_BANCO_SUCCESS = "Banco alterado com sucesso!";
+	private static final String MSG_DELETE_BANCO_SUCCESS = "Banco removido com sucesso!";
+	private static final String STATUS = "status";
+	private static final String MENSAGEM = "mensagem";
+
+	private static final Logger LOGGER = LogManager.getLogger(BancoController.class.getName());
+
 	@Autowired
 	private BancoRepository bancoRepository;
 
-	@GetMapping("/listarBancos")
-	public List<BancoDTO> listarBancos() {
-		// List<Banco> bancos = Arrays.asList(BancoEstatico.banco1,
-		// BancoEstatico.banco2);
+	@Autowired
+	private ObjectMapper mapper;
 
-		// Optional<List<BancoDTO>> bancosDto = BancoDTO.converter(bancos);
+	@GetMapping("/listarBancos")
+	public ObjectNode listarBancos() {
+
+		ObjectNode response = mapper.createObjectNode();
 
 		List<Banco> bancos = bancoRepository.findAll();
 
 		Optional<List<BancoDTO>> bancosDto = BancoDTO.converter(bancos);
 		if (bancosDto.isPresent()) {
-			return bancosDto.get();
+			response.put(STATUS, 200);
+			response.put(MENSAGEM, bancos.size() + " Banco(s) foi/foram encontrado(s).");
+			response.putPOJO("bancos", bancosDto.get());
 		} else {
-			return Collections.emptyList();
+			response.put(STATUS, 200);
+			response.put(MENSAGEM, "Nenhum Banco foi encontrado.");
+			response.putPOJO("bancos", Collections.emptyList());
 		}
 
+		return response;
+
 	}
 
-	@GetMapping("/{bancoId}/listarClientes")
-	public List<ClienteDTO> listarClientes(@PathVariable String bancoId) {
+	@PostMapping("/salvar")
+	public ObjectNode salvar(@RequestBody @Valid BancoForm bancoForm) {
 
-		List<Cliente> clientes = BancoEstatico.banco1.getClientes();
+		ObjectNode response = mapper.createObjectNode();
 
-		Optional<List<ClienteDTO>> clientesDto = ClienteDTO.converter(clientes);
-
-		if (clientesDto.isPresent()) {
-			return clientesDto.get();
-		} else {
-			return Collections.emptyList();
+		try {
+			LOGGER.debug("Salvando Banco...");
+			Banco banco = bancoForm.converter();
+			bancoRepository.save(banco);
+			response.put(STATUS, 200);
+			response.put(MENSAGEM, MSG_CREATE_BANCO_SUCCESS);
+			LOGGER.info(MSG_CREATE_BANCO_SUCCESS);
+		} catch (Exception e) {
+			LOGGER.info(e.getCause());
+			response.put(STATUS, "501");
+			response.put(MENSAGEM, "Não foi possivel salvar o Banco (" + e.getCause() + ")");
 		}
 
-	}
-
-//	@PostMapping("/salvar")
-//	public String salvar(@RequestBody UsuarioForm userForm) {
-//
-//		try {
-//			userForm.converter();
-//			return "Usuário salvo com sucesso";
-//		} catch (InputMismatchException e) {
-//			return e.getMessage();
-//		}
-//
-//	}
-
-	@PutMapping("/{id}")
-	public String atualizar(@PathVariable String id, @RequestBody @Valid AtualizacaoBancoForm bancoForm) {
-		
-		 boolean wasModified = bancoForm.atualizarNomeBanco(id, bancoRepository);
-		
-			if (wasModified) {
-				return "Nome do Banco alterado com sucesso!";
-			} else {
-				return "Não foi possível modificar o nome do banco";
-			}
+		return response;
 
 	}
 
-//	@DeleteMapping("/{id}")
-//	public String deletar(@PathVariable String id) {
-//
-//		List<Usuario> users = buscarUsuariosBanco();
-//
-//		Optional<Usuario> userFound = users.stream().filter(user -> user.getId().equals(Long.getLong(id))).findFirst();
-//
-//		if (userFound.isPresent()) {
-//			users.remove(userFound.get());
-//			System.out.println(users);
-//			return "Usuário removido com sucesso!";
-//		} else {
-//			return "Usuário não existente. Não foi possível remover o usuário.";
-//		}
-//
-//	}
+	@PutMapping("/editar/{id}")
+	public ObjectNode atualizar(@PathVariable String id, @RequestBody @Valid AtualizacaoBancoForm bancoForm) {
+
+		ObjectNode response = mapper.createObjectNode();
+
+		boolean wasModified = bancoForm.atualizarNomeBanco(id, bancoRepository);
+
+		if (wasModified) {
+			response.put(STATUS, 200);
+			response.put(MENSAGEM, MSG_EDIT_BANCO_SUCCESS);
+		} else {
+			response.put(STATUS, 501);
+			response.put(MENSAGEM, "Não foi possivel editar o banco.");
+		}
+
+		return response;
+	}
+
+	@DeleteMapping("/excluir/{id}")
+	public ObjectNode deletar(@PathVariable String id) {
+
+		ObjectNode response = mapper.createObjectNode();
+
+		try {
+			bancoRepository.deleteById(Long.parseLong(id));
+			response.put(STATUS, 200);
+			response.put(MENSAGEM, MSG_DELETE_BANCO_SUCCESS);
+		} catch (Exception e) {
+			response.put(STATUS, 501);
+			response.put(MENSAGEM, "Não foi possível remover o Banco. (" + e.getCause() + ")");
+		}
+
+		return response;
+
+	}
 
 }
