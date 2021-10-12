@@ -63,7 +63,7 @@ public class Banco {
 		setAgencia(agencia);
 		setClientes(new ArrayList<>());
 	}
-	
+
 	@SuppressWarnings("unused")
 	private Banco() {
 	}

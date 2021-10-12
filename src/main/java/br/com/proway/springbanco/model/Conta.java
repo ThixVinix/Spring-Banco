@@ -1,15 +1,27 @@
 package br.com.proway.springbanco.model;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import br.com.proway.springbanco.converter.TipoContaConverter;
+import br.com.proway.springbanco.enums.TipoContaEnum;
 
 @Entity
 @Table(name = "contas")
 public class Conta {
+
+	@Transient
+	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +50,15 @@ public class Conta {
 	 */
 	@Column(name = "limite", columnDefinition = "DECIMAL", unique = false, updatable = true, nullable = false)
 	private Double limite;
-	
+
+	@Convert(converter = TipoContaConverter.class)
+	@Column(name = "tipo", columnDefinition = "CHAR", unique = false, updatable = true, nullable = false)
+	private Enum<TipoContaEnum> tipoConta;
+
+	@Basic
+	@Column(name = "data_abertura", columnDefinition = "DATE", unique = false, updatable = false, nullable = false)
+	private LocalDate dataAbertura;
+
 	/**
 	 * <p>
 	 * Construtor para contas especiais, nas quais o limite eh personalizado.
@@ -54,17 +74,18 @@ public class Conta {
 		setSenha(senha);
 		setSaldo(0d);
 		setLimite(limite);
+		setTipoConta(TipoContaEnum.ESPECIAL);
+		setDataAbertura(LocalDate.now());
 	}
 
 	/**
 	 * <p>
-	 * Construtor para contas comuns, nas quais o limite padrao da conta
+	 * Construtor para contas normais(comuns), nas quais o limite padrao da conta
 	 * inicialmente eh definido para "500".
 	 * </p>
 	 * 
 	 * @param numero Numero da conta.
 	 * @param senha  Senha da conta.
-	 * @param limite Limite da conta.
 	 */
 	public Conta(String numero, Integer senha) {
 		super();
@@ -72,8 +93,9 @@ public class Conta {
 		setSenha(senha);
 		setSaldo(0d);
 		setLimite(500d);
+		setTipoConta(TipoContaEnum.NORMAL);
+		setDataAbertura(LocalDate.now());
 	}
-
 
 	@Override
 	public String toString() {
@@ -83,7 +105,11 @@ public class Conta {
 
 		for (var i = 0; i < getSenha().toString().length(); i++)
 			sb.append("*");
-		
+
+		sb.append("\n\tTipo da conta: " + getTipoConta().toString());
+
+		sb.append("\n\tData de abertura: " + getDataAberturaFormatada());
+
 		sb.append("\n\t" + visualizarSaldoAtual());
 		sb.append("\t" + visualizarLimiteAtual());
 
@@ -126,6 +152,35 @@ public class Conta {
 		this.limite = limite;
 	}
 
+	public Enum<TipoContaEnum> getTipoConta() {
+		return tipoConta;
+	}
+
+	public void setTipoConta(Enum<TipoContaEnum> tipo) {
+		this.tipoConta = tipo;
+	}
+
+	public LocalDate getDataAbertura() {
+		return dataAbertura;
+	}
+
+	/**
+	 * Retorna uma String da data de abertura da conta no seguinte formato:
+	 * "dd/MM/yyyy"
+	 */
+	public String getDataAberturaFormatada() {
+		
+		if (getDataAbertura() == null) {
+			return "";
+		}
+		
+		return getDataAbertura().format(this.formatter);
+	}
+
+	private void setDataAbertura(LocalDate dataAbertura) {
+		this.dataAbertura = dataAbertura;
+	}
+
 	public String visualizarSaldoAtual() {
 		return "Saldo atual: " + getSaldo() + "\n";
 	}
@@ -141,8 +196,8 @@ public class Conta {
 	 * </p>
 	 * 
 	 * @param valorDeposito Valor para deposito
-	 * @throws IllegalArgumentException Caso o valor do deposito seja negativo, eh
-	 *                                  lancada a excecao.
+	 * @throws IllegalArgumentException Caso o valor do deposito seja negativo ou
+	 *                                  igual a 0(zero), eh lancada a excecao.
 	 */
 	public void depositar(double valorDeposito) throws IllegalArgumentException {
 		if (valorDeposito <= 0) {

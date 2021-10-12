@@ -13,6 +13,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Entity
 @Table(name = "enderecos")
 public class Endereco {
@@ -56,7 +59,7 @@ public class Endereco {
 		if (!validarCep(cep))
 			throw new InputMismatchException("Formato do CPF invalido.");
 
-		String endereco[] = buscarCep(cep);
+		String[] endereco = buscarCep(cep);
 
 		setCep(endereco[0]);
 		setLogradouro(endereco[1]);
@@ -162,18 +165,52 @@ public class Endereco {
 		var jsonSb = new StringBuilder();
 
 		br.lines().forEach(l -> jsonSb.append(l.trim()));
-		String json = jsonSb.toString();
 
-		json = json.replaceAll("[{},:]", "");
-		json = json.replaceAll("\"", "\n");
-		String array[] = new String[30];
-		array = json.split("\n");
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode json = mapper.readTree(jsonSb.toString());
 
-		var cep = array[3];
-		var logradouro = array[7];
-		var bairro = array[15];
-		var cidade = array[19];
-		var uf = array[23];
+		final String CEP = "cep";
+		final String LOGRADOURO = "logradouro";
+		final String BAIRRO = "bairro";
+		final String LOCALIDADE = "localidade";
+		final String UF = "uf";
+
+		String cep;
+		String logradouro;
+		String bairro;
+		String cidade;
+		String uf;
+
+		if (json.get(CEP) != null && json.get(CEP).textValue().getBytes().length > 0) {
+			cep = json.get(CEP).textValue();
+		} else {
+			cep = "";
+		}
+
+		if (json.get(LOGRADOURO) != null && json.get(LOGRADOURO).textValue().getBytes().length > 0) {
+			logradouro = json.get(LOGRADOURO).textValue();
+		} else {
+			logradouro = "";
+		}
+
+		if (json.get(BAIRRO) != null && json.get(BAIRRO).textValue().getBytes().length > 0) {
+			bairro = json.get(BAIRRO).textValue();
+		} else {
+			bairro = "";
+		}
+
+		if (json.get(LOCALIDADE) != null && json.get(LOCALIDADE).textValue().getBytes().length > 0) {
+			cidade = json.get(LOCALIDADE).textValue();
+		} else {
+			cidade = "";
+		}
+
+		if (json.get(UF) != null && json.get(UF).textValue().getBytes().length > 0) {
+			uf = json.get(UF).textValue();
+		} else {
+			uf = "";
+		}
+
 		return new String[] { cep, logradouro, bairro, cidade, uf };
 
 	}

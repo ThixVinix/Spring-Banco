@@ -9,6 +9,9 @@ import javax.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,6 +93,7 @@ public class BancoController {
 	}
 
 	@PutMapping("/editar/{id}")
+	@Transactional
 	public ObjectNode atualizar(@PathVariable String id, @RequestBody @Valid AtualizacaoBancoForm bancoForm) {
 
 		ObjectNode response = mapper.createObjectNode();
@@ -108,7 +112,7 @@ public class BancoController {
 	}
 
 	@DeleteMapping("/excluir/{id}")
-	public ObjectNode deletar(@PathVariable String id) {
+	public ResponseEntity<ObjectNode> deletar(@PathVariable String id) {
 
 		ObjectNode response = mapper.createObjectNode();
 
@@ -116,12 +120,12 @@ public class BancoController {
 			bancoRepository.deleteById(Long.parseLong(id));
 			response.put(STATUS, 200);
 			response.put(MENSAGEM, MSG_DELETE_BANCO_SUCCESS);
+			return ResponseEntity.ok(response);
 		} catch (Exception e) {
-			response.put(STATUS, 501);
+			response.put(STATUS, HttpStatus.NOT_FOUND.value());
 			response.put(MENSAGEM, "Não foi possível remover o Banco. (" + e.getCause() + ")");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
 		}
-
-		return response;
 
 	}
 
